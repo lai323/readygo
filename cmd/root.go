@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	initWithConfig bool
-	rootCmd        = &cobra.Command{
+	initWithOutConfig bool
+	rootCmd           = &cobra.Command{
 		Use:   "readygo module_name out_dir",
 		Short: "create empty project with cobra and spf13",
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -24,7 +24,7 @@ var (
 			if len(args) > 1 {
 				outdir = args[1]
 			}
-			err := generate.InitCli(args[0], outdir, initWithConfig)
+			err := generate.InitCli(args[0], outdir, !initWithOutConfig)
 			if err != nil {
 				fmt.Printf("error: %s\n", err.Error())
 			}
@@ -40,5 +40,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVar(&initWithConfig, "with-config", true, "Use configuration files")
+	rootCmd.PersistentFlags().BoolVar(&initWithOutConfig, "without-config", false, "Not use configuration files")
 }

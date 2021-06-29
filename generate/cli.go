@@ -133,7 +133,7 @@ func mkdirAll(dir string) error {
 	return afero.NewOsFs().MkdirAll(dir, 0755)
 }
 
-func goInit(projectDir, module string) error{
+func goInit(projectDir, module string) error {
 	cmdinit := exec.Command("go", "mod", "init", module)
 	cmdinit.Dir = projectDir
 	err := cmdinit.Run()
@@ -149,7 +149,7 @@ var tmplTextMain = `
 package main
 
 import (
-	"{{ .Module }}/cmd"
+	"{{- .Module }}/cmd"
 )
 
 func main() {
@@ -163,10 +163,16 @@ package cmd
 import (
 	"fmt"
 	"os"
-	{{ if .WithConfig }}"{{ .Module }}/config"{{ end }}
-	{{ if .WithConfig }}"github.com/spf13/afero"{{ end }}
+	{{ if .WithConfig }}"
+	{{- .Module }}/config"
+	{{- end }}
+	{{- if .WithConfig }}
+	"github.com/spf13/afero"
+	{{- end }}
 	"github.com/spf13/cobra"
-	{{ if .WithConfig }}"github.com/spf13/viper"{{ end }}
+	{{- if .WithConfig }}
+	"github.com/spf13/viper"
+	{{- end }}
 )
 
 var (
@@ -184,10 +190,12 @@ var (
 		Short: "sub command example",
 		Run: func(cmd *cobra.Command, args []string) {
 			// cmd.Help()
-			{{ if .WithConfig }}fmt.Println(viper.GetString("var"))
-			fmt.Println(viper.GetString("VarFromFile")) {{ else }}
+			{{- if .WithConfig }}
+			fmt.Println(viper.GetString("var"))
+			fmt.Println(viper.GetString("VarFromFile"))
+			{{- else }}
 			// Do Stuff Here
-			{{ end }}
+			{{- end }}
 		},
 	}
 )
@@ -198,7 +206,7 @@ func Execute() {
 		os.Exit(1)
 	}
 }
-{{ if .WithConfig }}
+{{- if .WithConfig }}
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", fmt.Sprintf("config file (default is %s)", config.DefaultConfigPath))
@@ -213,7 +221,11 @@ func initConfig() {
 		panic(err)
 	}
 }
-{{ end }}
+{{- else}}
+func init() {
+	rootCmd.AddCommand(subCmd)
+}
+{{- end }}
 
 `
 
@@ -242,12 +254,12 @@ var (
 
 func init() {
 	var err error
-	DefaultConfigPath, err = xdg.ConfigFile("{{ .Module }}/{{ .Module }}.toml")
+	DefaultConfigPath, err = xdg.ConfigFile("{{- .Module }}/{{- .Module }}.toml")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defaultConfigDir = path.Dir(DefaultConfigPath)
-	defaultStorageDir = path.Join(xdg.DataHome, "{{ .Module }}")
+	defaultStorageDir = path.Join(xdg.DataHome, "{{- .Module }}")
 
 	err = createDefaultFile(afero.NewOsFs())
 	if err != nil {
