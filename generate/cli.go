@@ -140,6 +140,14 @@ func goInit(projectDir, module string) error {
 	if err != nil {
 		return err
 	}
+
+	cmdreplace := exec.Command("go", "mod", "edit", "-replace", "github.com/spf13/afero=github.com/spf13/afero@v1.5.1")
+	cmdreplace.Dir = projectDir
+	err = cmdreplace.Run()
+	if err != nil {
+		return err
+	}
+
 	cmdtidy := exec.Command("go", "mod", "tidy")
 	cmdtidy.Dir = projectDir
 	return cmdtidy.Run()
