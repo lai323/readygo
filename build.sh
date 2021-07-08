@@ -1,1 +1,3 @@
-go build -o dist/readygo-linux-v0.1.0 main.go
+
+version=$(echo "$(git --no-pager tag)" | sed -n '$p')
+go build -o dist/readygo-linux-$version main.go
